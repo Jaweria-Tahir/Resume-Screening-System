@@ -1,23 +1,31 @@
-# Resume Screening System
+# AI RESUME SCANNER
 
-Upload a resume (PDF or DOCX) → get an automatic **job category prediction**
-(ML classifier) and, if you paste in a job description, a **match score**
-(text similarity).
+Upload a resume (PDF/DOCX) → get an ML-predicted job category, and, if you paste in a job description, an instant match score.
+<img width="1900" height="860" alt="image" src="https://github.com/user-attachments/assets/8d00fcd8-dafa-4f12-87ad-02702a850401" />
+<img width="1902" height="832" alt="image" src="https://github.com/user-attachments/assets/4f4f9782-cff3-47b5-9a7c-9d2c438e4baf" />
+<img width="1871" height="840" alt="image" src="https://github.com/user-attachments/assets/7e87b93b-6fe7-4a9e-9bb8-4d1aa4678850" />
 
-## How it works (the short version)
+Live Demo:  https://ai-resume-scanner-lake.vercel.app/
 
-```
-resume file  ──▶  extract text  ──▶  clean text  ──┬──▶  TF-IDF + Logistic Regression ──▶ predicted category
-                                                      │
-                       job description (optional) ──┴──▶  TF-IDF cosine similarity ──▶ match score %
-```
 
-- **Classification**: a `LogisticRegression` model trained on ~960 labelled
-  resumes (25 job categories) using TF-IDF text features. Trained once,
-  offline, saved to disk, loaded by the API at startup.
-- **Matching**: a lightweight TF-IDF + cosine similarity between the resume
-  text and whatever job description you paste in. No training needed for
-  this part — it just compares the two documents.
+This is a small end-to-end ML application: a resume comes in as a file, a TF-IDF + Logistic Regression classifier predicts which of 25 job categories it belongs to, and — if a job description is pasted in — a TF-IDF cosine-similarity matcher scores how well the resume fits that specific role.It's built as a realistic, minimal-scope portfolio project: a FastAPI backend serving a scikit-learn model, a static frontend, and a documented, honest evaluation of the model's limits
+
+## Features
+Resume upload — accepts .pdf and .docx, up to 5MB
+Job category prediction — 25 categories, with confidence score and top-3 alternatives
+Job-match scoring — optional job description input returns a similarity % and matched keywords
+Input validation — rejects unreadable, empty, or non-resume-looking files with clear error messages
+Auto-generated API docs — interactive Swagger UI via FastAPI
+
+## Tech Stack
+
+| Layer                | Technology                                                    |
+| -------------------- | ------------------------------------------------------------- |
+| **API**              | FastAPI, Uvicorn                                              |
+| **Machine Learning** | scikit-learn (TF-IDF, Logistic Regression, Cosine Similarity) |
+| **File Parsing**     | pdfplumber (PDF), python-docx (DOCX)                          |
+| **Frontend**         | HTML, CSS, Vanilla JavaScript                                 |
+| **Deployment**       | Dockerized FastAPI on Render, Frontend on Vercel              |
 
 ## Project structure
 
@@ -48,100 +56,44 @@ resume-screening-system/
 ```
 
 ## Setup
-
 ### 1. Backend
-
 cd backend
 pip install -r requirements.txt
-```
-
-```bash
 python ml_training/train_model.py
-```
 
 Start the API:
-
-```bash
 uvicorn app.main:app --reload --port 8000
-```
-
-Visit `http://localhost:8000/docs` for interactive API docs (FastAPI
-generates this automatically from the Pydantic schemas).
 
 ### 2. Frontend
 
-No build step — just open the file, or serve it so it isn't a `file://`
-origin (nicer for the browser's dev tools / CORS):
-
-```bash
 cd frontend
 python -m http.server 5500
-```
 
-Then open `http://localhost:5500`. Make sure the backend is running on
-port 8000 first — `script.js` points at `http://localhost:8000`.
-
-## API
-
-`POST /api/screen`
-
-| field             | type | required | notes                               |
-|-------------------|------|----------|--------------------------------------|
-| `file`            | file | yes      | `.pdf` or `.docx`, max 5MB           |
-| `job_description` | text | no       | if given, also returns a match score |
-
-Response:
-
-```json
+## Example response
 {
   "filename": "resume.pdf",
   "predicted_category": "Data Science",
   "confidence": 0.87,
   "top_predictions": [
-    {"category": "Data Science", "probability": 0.87},
-    {"category": "Python Developer", "probability": 0.06},
-    {"category": "Hadoop", "probability": 0.03}
+    { "category": "Data Science", "probability": 0.87 },
+    { "category": "Python Developer", "probability": 0.06 },
+    { "category": "Hadoop", "probability": 0.03 }
   ],
   "match_score": 62.4,
   "matched_keywords": ["python", "sql", "machine", "learning"],
   "extracted_text_preview": "..."
 }
-```
 
-## Notes / things you could improve next
+## Deployment
+Backend: Dockerized FastAPI app, deployed via Render (render.yaml included)
+Frontend: Static site deployed on Vercel.Deployment
 
-- **Dataset reality check**: the raw CSV has 962 rows but 796 of them are
-  exact-duplicate resumes — only **166 are actually unique**. The original
-  training script did a random train/test split on the raw (undeduplicated)
-  data, so duplicate copies of the same resume ended up in both train and
-  test, which is why it reported ~99.5% accuracy. That number was not real.
-  `train_model.py` now de-duplicates first and evaluates with stratified
-  k-fold cross-validation instead, which gives an honest estimate: **~89%
-  accuracy / ~0.86 macro-F1** on genuinely unseen resumes. That's the number
-  to trust, and it's actually a solid result for 166 examples across 25
-  classes — but it also means confidence scores on real-world resumes will
-  be more modest (and more honest) than before.
-- **To meaningfully improve accuracy further, you need more unique labeled
-  resumes** — no amount of algorithm tuning fixes a 166-example dataset.
-  Concrete ways to grow it, roughly in order of effort:
-  1. Merge in another public labeled resume dataset (search Kaggle/Hugging
-     Face for "resume classification dataset" — several exist with
-     different categories; you'll need to reconcile category names).
-  2. Reduce from 25 categories to a smaller set of broader roles if some
-     categories aren't important to your use case — fewer classes means
-     each one needs less data to be reliable.
-  3. Collect real resumes from your own hiring pipeline (with consent) and
-     label them — even 20-30 more per category would help a lot given how
-     small this is.
-  4. As a stopgap, LLM-generated synthetic resumes per category can pad out
-     the smallest classes, but they tend to be more homogeneous than real
-     resumes, so treat them as a supplement, not a replacement.
-- The matcher fits a fresh TF-IDF per request on just the resume + job
-  description; that's fine for one-off comparisons but wouldn't scale well
-  to ranking hundreds of resumes against one job description efficiently —
-  you'd want to vectorize once and batch-compare for that.
-- No database yet — nothing is persisted. Adding one (e.g. SQLite via
-  SQLAlchemy) would be a natural next step if you want a history of past
-  screenings.
-- No auth — anyone who can reach the API can use it. Fine for local/demo
-  use, not for a public deployment.
+## Future Improvements
+Store screening results and resume history using a database.
+Add user authentication and role-based access control.
+Improve the resume matching algorithm using semantic similarity instead of keyword matching.
+Optimize the application's performance to reduce prediction time.
+Enhance the UI/UX and add progress indicators during resume analysis.
+
+Backend: Dockerized FastAPI app, deployed via Render (render.yaml included).
+Frontend: Static site deployed on Vercel.
