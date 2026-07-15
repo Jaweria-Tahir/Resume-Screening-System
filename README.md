@@ -68,9 +68,10 @@ python ml_training/train_model.py
 uvicorn app.main:app --reload --port 8000
 ```
 ### 2. Frontend
+```bash
 cd frontend
 python -m http.server 5500
-
+```
 ## Example response
 ```json
 {
