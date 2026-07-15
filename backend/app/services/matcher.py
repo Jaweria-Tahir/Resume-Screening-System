@@ -1,5 +1,6 @@
 
 
+<<<<<<< HEAD
 try:
     from sklearn.feature_extraction.text import TfidfVectorizer
     # Some linters/analysis tools can't resolve ENGLISH_STOP_WORDS from
@@ -10,6 +11,9 @@ except Exception:
     # Fallbacks if sklearn isn't available at import-check time.
     from sklearn.feature_extraction.text import TfidfVectorizer
     ENGLISH_STOP_WORDS = set()
+=======
+from sklearn.feature_extraction.text import TfidfVectorizer, ENGLISH_STOP_WORDS
+>>>>>>> deb16531cab961bf2aa4c3aa8a76b689f5b6e638
 from sklearn.metrics.pairwise import cosine_similarity
 
 from app.services.preprocess import clean_text
