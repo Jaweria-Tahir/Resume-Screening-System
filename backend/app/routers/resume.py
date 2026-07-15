@@ -29,8 +29,18 @@ async def screen_resume( file: UploadFile = File(..., description="Resume file (
             status_code=422,
             detail="Could not extract any text from this file. It may be a scanned/image-based PDF.",
         )
-
+    if len(resume_text.strip()) < 150:
+        raise HTTPException(
+            status_code=422,
+            detail="This file doesn't look like a resume — not enough readable text was found.",
+        )
+    
     classification = predict_category(resume_text)
+    if not classification["is_confident"]:
+        raise HTTPException(
+            status_code=422,
+            detail="This doesn't look like a resume. Please upload a valid CV.",
+        )
 
     result = {
         "filename": file.filename,
