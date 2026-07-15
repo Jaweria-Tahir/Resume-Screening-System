@@ -59,41 +59,58 @@ resume-screening-system/
 ### 1. Backend
 cd backend
 pip install -r requirements.txt
+
+# (Optional) retrain the model from scratch
 python ml_training/train_model.py
 
-Start the API:
+# Start the API
 uvicorn app.main:app --reload --port 8000
 
 ### 2. Frontend
-
 cd frontend
 python -m http.server 5500
 
 ## Example response
+```json
 {
   "filename": "resume.pdf",
   "predicted_category": "Data Science",
   "confidence": 0.87,
   "top_predictions": [
-    { "category": "Data Science", "probability": 0.87 },
-    { "category": "Python Developer", "probability": 0.06 },
-    { "category": "Hadoop", "probability": 0.03 }
+    {
+      "category": "Data Science",
+      "probability": 0.87
+    },
+    {
+      "category": "Python Developer",
+      "probability": 0.06
+    },
+    {
+      "category": "Hadoop",
+      "probability": 0.03
+    }
   ],
   "match_score": 62.4,
-  "matched_keywords": ["python", "sql", "machine", "learning"],
-  "extracted_text_preview": "..."
+  "matched_keywords": [
+    "python",
+    "sql",
+    "machine",
+    "learning"
+  ],
+  "extracted_text_preview": "Experienced data scientist with expertise in Python, SQL, machine learning, and data visualization..."
 }
+```
 
 ## Deployment
 Backend: Dockerized FastAPI app, deployed via Render (render.yaml included)
 Frontend: Static site deployed on Vercel.Deployment
 
 ## Future Improvements
-Store screening results and resume history using a database.
-Add user authentication and role-based access control.
-Improve the resume matching algorithm using semantic similarity instead of keyword matching.
-Optimize the application's performance to reduce prediction time.
-Enhance the UI/UX and add progress indicators during resume analysis.
+-Store screening results and resume history using a database.
+-Add user authentication and role-based access control.
+-Improve the resume matching algorithm using semantic similarity instead of keyword matching.
+-Optimize the application's performance to reduce prediction time.
+-Enhance the UI/UX and add progress indicators during resume analysis.
 
 Backend: Dockerized FastAPI app, deployed via Render (render.yaml included).
 Frontend: Static site deployed on Vercel.
