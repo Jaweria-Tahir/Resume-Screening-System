@@ -10,10 +10,6 @@ _model = joblib.load(MODEL_DIR / "classifier.pkl")
 _vectorizer = joblib.load(MODEL_DIR / "vectorizer.pkl")
 _label_encoder = joblib.load(MODEL_DIR / "label_encoder.pkl")
 
-<<<<<<< HEAD
-=======
-
->>>>>>> deb16531cab961bf2aa4c3aa8a76b689f5b6e638
 def predict_category(resume_text: str, top_n: int = 3) -> dict:
   
     cleaned = clean_text(resume_text)
