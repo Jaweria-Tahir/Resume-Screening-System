@@ -60,10 +60,10 @@ resume-screening-system/
 cd backend
 pip install -r requirements.txt
 
-# (Optional) retrain the model from scratch
+(Optional) retrain the model from scratch
 python ml_training/train_model.py
 
-# Start the API
+Start the API
 uvicorn app.main:app --reload --port 8000
 
 ### 2. Frontend
