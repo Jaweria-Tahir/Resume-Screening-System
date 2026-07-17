@@ -113,6 +113,3 @@ Frontend: Static site deployed on Vercel.Deployment
 -Improve the resume matching algorithm using semantic similarity instead of keyword matching.
 -Optimize the application's performance to reduce prediction time.
 -Enhance the UI/UX and add progress indicators during resume analysis.
-
-Backend: Dockerized FastAPI app, deployed via Render (render.yaml included).
-Frontend: Static site deployed on Vercel.
