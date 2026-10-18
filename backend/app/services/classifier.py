@@ -1,4 +1,3 @@
-
 from pathlib import Path
 import joblib
 
@@ -10,8 +9,8 @@ _model = joblib.load(MODEL_DIR / "classifier.pkl")
 _vectorizer = joblib.load(MODEL_DIR / "vectorizer.pkl")
 _label_encoder = joblib.load(MODEL_DIR / "label_encoder.pkl")
 
+
 def predict_category(resume_text: str, top_n: int = 3) -> dict:
-  
     cleaned = clean_text(resume_text)
     vector = _vectorizer.transform([cleaned])
 
@@ -26,11 +25,11 @@ def predict_category(resume_text: str, top_n: int = 3) -> dict:
         for idx in top_indices
     ]
 
-    CONFIDENCE_THRESHOLD = 0.35
-    is_confident = top_predictions[0]["probability"] >= CONFIDENCE_THRESHOLD
     return {
-    "predicted_category": top_predictions[0]["category"] if is_confident else "Unknown / Not a resume",
-    "confidence": top_predictions[0]["probability"],
-    "top_predictions": top_predictions,
-    "is_confident": is_confident,
-}
+        # Always return the best guess. Never label a CV "Unknown".
+        "predicted_category": top_predictions[0]["category"],
+        "confidence": top_predictions[0]["probability"],
+        "top_predictions": top_predictions,
+        # Kept only as an information flag. Nothing blocks or renames the result.
+        "is_confident": top_predictions[0]["probability"] >= 0.20,
+    }

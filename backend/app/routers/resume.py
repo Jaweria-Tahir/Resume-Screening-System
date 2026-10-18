@@ -36,11 +36,6 @@ async def screen_resume( file: UploadFile = File(..., description="Resume file (
         )
     
     classification = predict_category(resume_text)
-    if not classification["is_confident"]:
-        raise HTTPException(
-            status_code=422,
-            detail="This doesn't look like a resume. Please upload a valid CV.",
-        )
 
     result = {
         "filename": file.filename,
